@@ -34,8 +34,6 @@ type Addon = {
   price: number;
 };
 
-const supabase = createClient();
-
 export default function CarwashBookPage() {
   const router = useRouter();
   const { success, error } = useToast();
@@ -61,6 +59,8 @@ export default function CarwashBookPage() {
   const [addons, setAddons] = useState<Addon[]>([]);
 
   useEffect(() => {
+    const supabase = createClient();
+
     Promise.all([
       supabase.from('carwash_vehicle_types').select('id, name, description, base_price_multiplier').eq('active', true).order('sort_order'),
       supabase.from('carwash_services').select('id, name, description, base_price, duration_minutes').eq('active', true).order('sort_order'),
@@ -98,6 +98,7 @@ export default function CarwashBookPage() {
     setLoading(true);
 
     try {
+      const supabase = createClient();
       if (!selectedVehicle || !selectedService || !selectedDate || !selectedTime) throw new Error('Complete all booking details.');
       const { data: { user } } = await supabase.auth.getUser();
       const { error: bookingError } = await supabase.from('carwash_bookings').insert({

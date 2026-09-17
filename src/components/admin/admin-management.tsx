@@ -24,7 +24,6 @@ function youtubeEmbed(url: string) {
 
 export default function AdminManagement({ categories: initialCategories, items: initialItems, events: initialEvents, podcasts: initialPodcasts }: { categories: Category[]; items: Item[]; events: Event[]; podcasts: Podcast[] }) {
   const { success, error: showError } = useToast();
-  const supabase = createClient();
   const [tab, setTab] = useState<'menu' | 'events' | 'podcasts'>('menu');
   const [categories, setCategories] = useState(initialCategories);
   const [items, setItems] = useState(initialItems);
@@ -46,6 +45,7 @@ export default function AdminManagement({ categories: initialCategories, items: 
   const closeModal = () => { setModal(null); setEditing(null); };
 
   async function uploadImage(file: File, onUrl: (url: string) => void) {
+    const supabase = createClient();
     if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) return showError('Choose an image under 5MB.');
     setUploading(true);
     const path = `content/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '-')}`;
@@ -57,6 +57,7 @@ export default function AdminManagement({ categories: initialCategories, items: 
 
   async function saveProduct(event: FormEvent) {
     event.preventDefault();
+    const supabase = createClient();
     if (!productDraft.name.trim() || !productDraft.category_id || !productDraft.description.trim() || Number(productDraft.price) < 0) return showError('Name, description, category and a valid price are required.');
     setSaving(true);
     const payload = { name: productDraft.name.trim(), description: productDraft.description.trim(), category_id: productDraft.category_id, price: Number(productDraft.price), promotional_price: productDraft.promotional_price ? Number(productDraft.promotional_price) : null, available: productDraft.available, featured: productDraft.featured, image_url: productDraft.image_url || null };
@@ -66,7 +67,9 @@ export default function AdminManagement({ categories: initialCategories, items: 
   }
 
   async function saveCategory(event: FormEvent) {
-    event.preventDefault(); if (!categoryDraft.name.trim()) return showError('Category name is required.');
+    event.preventDefault();
+    const supabase = createClient();
+    if (!categoryDraft.name.trim()) return showError('Category name is required.');
     setSaving(true); const payload = { name: categoryDraft.name.trim(), description: categoryDraft.description.trim() || null, parent_id: categoryDraft.parent_id || null };
     const result = editing ? await supabase.from('menu_categories').update(payload).eq('id', editing.id).select().single() : await supabase.from('menu_categories').insert(payload).select().single();
     setSaving(false); if (result.error) return showError(result.error.message);
@@ -74,7 +77,9 @@ export default function AdminManagement({ categories: initialCategories, items: 
   }
 
   async function saveEvent(event: FormEvent) {
-    event.preventDefault(); if (!eventDraft.title.trim() || !eventDraft.description.trim() || !eventDraft.event_date || !eventDraft.event_time || !eventDraft.location.trim()) return showError('Title, description, date, time and location are required.');
+    event.preventDefault();
+    const supabase = createClient();
+    if (!eventDraft.title.trim() || !eventDraft.description.trim() || !eventDraft.event_date || !eventDraft.event_time || !eventDraft.location.trim()) return showError('Title, description, date, time and location are required.');
     setSaving(true); const slug = editing ? events.find((item) => item.id === editing.id)?.slug : `${eventDraft.title}-${crypto.randomUUID()}`; const payload = { ...eventDraft, ticket_price: eventDraft.ticket_price ? Number(eventDraft.ticket_price) : null, ticket_capacity: eventDraft.ticket_capacity ? Number(eventDraft.ticket_capacity) : null, slug: (slug || eventDraft.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''), image_url: eventDraft.image_url || null, entertainment: eventDraft.entertainment || null };
     const result = editing ? await supabase.from('events').update(payload).eq('id', editing.id).select().single() : await supabase.from('events').insert(payload).select().single();
     setSaving(false); if (result.error) return showError(result.error.message);
@@ -82,7 +87,9 @@ export default function AdminManagement({ categories: initialCategories, items: 
   }
 
   async function savePodcast(event: FormEvent) {
-    event.preventDefault(); if (!podcastDraft.title.trim() || !youtubeEmbed(podcastDraft.youtube_url)) return showError('Title and a valid YouTube URL are required.');
+    event.preventDefault();
+    const supabase = createClient();
+    if (!podcastDraft.title.trim() || !youtubeEmbed(podcastDraft.youtube_url)) return showError('Title and a valid YouTube URL are required.');
     setSaving(true); const result = editing ? await supabase.from('podcasts').update(podcastDraft).eq('id', editing.id).select().single() : await supabase.from('podcasts').insert(podcastDraft).select().single();
     setSaving(false); if (result.error) return showError(result.error.message);
     setPodcasts((current) => editing ? current.map((item) => item.id === editing.id ? result.data : item) : [...current, result.data]); closeModal(); success(editing ? 'Podcast updated.' : 'Podcast created.');
@@ -90,6 +97,7 @@ export default function AdminManagement({ categories: initialCategories, items: 
 
   async function remove(table: 'menu_items' | 'menu_categories' | 'events' | 'podcasts', id: string, label: string) {
     if (!window.confirm(`Delete ${label}? This cannot be undone.`)) return;
+    const supabase = createClient();
     const result = await supabase.from(table).delete().eq('id', id); if (result.error) return showError(result.error.message);
     if (table === 'menu_items') setItems((current) => current.filter((item) => item.id !== id));
     if (table === 'menu_categories') setCategories((current) => current.filter((item) => item.id !== id));

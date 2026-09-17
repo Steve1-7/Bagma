@@ -13,7 +13,6 @@ const blank = (addon = false): Draft => ({ name: '', description: '', price: '',
 
 export default function AdminCarwash({ initialServices, initialAddons }: { initialServices: Service[]; initialAddons: Addon[] }) {
   const { success, error } = useToast();
-  const supabase = createClient();
   const [services, setServices] = useState(initialServices);
   const [addons, setAddons] = useState(initialAddons);
   const [serviceDraft, setServiceDraft] = useState(blank());
@@ -22,6 +21,7 @@ export default function AdminCarwash({ initialServices, initialAddons }: { initi
   const [uploading, setUploading] = useState(false);
 
   async function uploadImage(file: File, setUrl: (url: string) => void) {
+    const supabase = createClient();
     if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) return error('Choose an image under 5MB.');
     setUploading(true);
     const path = `carwash/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '-')}`;
@@ -33,6 +33,7 @@ export default function AdminCarwash({ initialServices, initialAddons }: { initi
 
   async function saveService(event: FormEvent) {
     event.preventDefault();
+    const supabase = createClient();
     if (!serviceDraft.name.trim() || !serviceDraft.description.trim() || Number(serviceDraft.price) < 0 || Number(serviceDraft.duration) < 1) return error('Name, description, price and duration are required.');
     const payload = { name: serviceDraft.name.trim(), description: serviceDraft.description.trim(), base_price: Number(serviceDraft.price), duration_minutes: Number(serviceDraft.duration), active: serviceDraft.active, featured: serviceDraft.featured, image_url: serviceDraft.image_url || null };
     const result = editing?.type === 'service' ? await supabase.from('carwash_services').update(payload).eq('id', editing.id).select().single() : await supabase.from('carwash_services').insert(payload).select().single();
@@ -43,6 +44,7 @@ export default function AdminCarwash({ initialServices, initialAddons }: { initi
 
   async function saveAddon(event: FormEvent) {
     event.preventDefault();
+    const supabase = createClient();
     if (!addonDraft.name.trim() || !addonDraft.description.trim() || Number(addonDraft.price) < 0) return error('Name, description and price are required.');
     const payload = { name: addonDraft.name.trim(), description: addonDraft.description.trim(), price: Number(addonDraft.price), active: addonDraft.active, image_url: addonDraft.image_url || null };
     const result = editing?.type === 'addon' ? await supabase.from('carwash_addons').update(payload).eq('id', editing.id).select().single() : await supabase.from('carwash_addons').insert(payload).select().single();
@@ -53,6 +55,7 @@ export default function AdminCarwash({ initialServices, initialAddons }: { initi
 
   async function remove(table: 'carwash_services' | 'carwash_addons', id: string) {
     if (!window.confirm('Delete this carwash item?')) return;
+    const supabase = createClient();
     const result = await supabase.from(table).delete().eq('id', id);
     if (result.error) return error(result.error.message);
     if (table === 'carwash_services') setServices((current) => current.filter((item) => item.id !== id));
