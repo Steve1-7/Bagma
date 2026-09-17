@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
 import Card from '@/components/ui/card';
@@ -11,6 +11,7 @@ import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { createClient } from '@/lib/supabase/client';
 import { notifyWhatsApp } from '@/lib/notify-whatsapp';
+import { getPaymentOptions } from '@/lib/payment';
 
 const deliveryArea = 'Madabani, Western';
 const uberEatsUrl = process.env.NEXT_PUBLIC_UBEREATS_URL || 'https://www.ubereats.com/';
@@ -40,11 +41,43 @@ export default function CheckoutPage() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank_transfer' | 'paypal' | 'crypto' | 'cash_on_collection'>(
+    orderType === 'collection' ? 'cash_on_collection' : 'card'
+  );
+
+  const paymentOptions = useMemo(() => getPaymentOptions(orderType), [orderType]);
+  const selectedPaymentMethod = useMemo(() => {
+    if (paymentOptions.some((option) => option.value === paymentMethod)) {
+      return paymentMethod;
+    }
+
+    return orderType === 'collection' ? 'cash_on_collection' : 'card';
+  }, [orderType, paymentMethod, paymentOptions]);
 
   useEffect(() => {
     if (items.length === 0) {
       router.replace('/cart');
+      return;
     }
+
+    const supabase = createClient();
+    const loadProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      if (!profile) return;
+
+      setFormData((current) => ({
+        ...current,
+        fullName: profile.full_name || [profile.first_name, profile.last_name].filter(Boolean).join(' ') || current.fullName,
+        phone: profile.phone || current.phone,
+        email: profile.email || user.email || current.email,
+        deliveryAddress: profile.address || current.deliveryAddress,
+      }));
+    };
+
+    void loadProfile();
   }, [items.length, router]);
 
   if (items.length === 0) return null;
@@ -55,6 +88,23 @@ export default function CheckoutPage() {
       error('A delivery address is required for delivery orders.');
       return;
     }
+
+    if (selectedPaymentMethod === 'cash_on_collection' && orderType !== 'collection') {
+      error('Cash on collection is only available for collection orders.');
+      return;
+    }
+
+    const selected = paymentOptions.find((option) => option.value === selectedPaymentMethod);
+    if (!selected || (!selected.active && selected.state !== 'requires_configuration')) {
+      error('Please choose an available payment method.');
+      return;
+    }
+
+    if (!selected.active) {
+      error(`${selected.label} is not configured yet. Please choose a working payment method.`);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -71,6 +121,9 @@ export default function CheckoutPage() {
         delivery_address: orderType === 'delivery' ? formData.deliveryAddress.trim() : null,
         delivery_instructions: orderType === 'delivery' ? formData.deliveryInstructions.trim() || null : null,
         order_type: orderType,
+        payment_method: selectedPaymentMethod,
+        payment_status: selectedPaymentMethod === 'card' || selectedPaymentMethod === 'paypal' ? 'paid' : selectedPaymentMethod === 'bank_transfer' || selectedPaymentMethod === 'crypto' ? 'awaiting_verification' : 'pending',
+        payment_provider: selectedPaymentMethod === 'card' ? 'card' : selectedPaymentMethod,
         subtotal,
         delivery_fee: deliveryFee,
         total,
@@ -196,6 +249,31 @@ export default function CheckoutPage() {
                 </div>
               </Card>
             )}
+
+            <Card className="p-6">
+              <h2 className="text-xl font-bold text-white mb-6">Payment</h2>
+              <div className="space-y-3">
+                {paymentOptions.map((option) => {
+                  const isSelected = selectedPaymentMethod === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => option.active && setPaymentMethod(option.value)}
+                      className={`flex w-full items-start justify-between rounded-xl border p-4 text-left transition-all ${isSelected ? 'border-gold bg-gold/10' : 'border-white/10 bg-[#130d0b]'} ${!option.active ? 'cursor-not-allowed opacity-60' : ''}`}
+                    >
+                      <div>
+                        <div className="font-semibold text-white">{option.label}</div>
+                        <div className="mt-1 text-sm text-white/60">{option.description}</div>
+                      </div>
+                      <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${option.active ? 'bg-green-500/10 text-green-400' : 'bg-red/10 text-red'}`}>
+                        {option.active ? (option.state === 'collection_only' ? 'Collection only' : 'Available') : 'Requires config'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </Card>
 
             {/* Order Notes */}
             <Card className="p-6">

@@ -38,12 +38,19 @@ export default function Home() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row"><Button size="lg" asChild><Link href="/order">Order food <ArrowRight className="ml-2 h-5 w-5" /></Link></Button><Button size="lg" variant="outline" asChild><Link href="/carwash">Book carwash</Link></Button></div>
             <p className="mt-8 text-sm font-semibold uppercase tracking-[0.24em] text-white/45">Bagma Lifestyle <span className="mx-2 text-red">/</span> Eat. Wash. Chill. Repeat.</p>
           </div>
-          <div className="relative hidden min-h-115 lg:block">
-            <div className="absolute inset-x-10 top-6 bottom-0 border border-white/15 bg-black/20" />
+          <div className="relative block min-h-[20rem] w-full max-w-[32rem] lg:min-h-[34rem] lg:max-w-none">
+            <div className="absolute inset-x-4 top-6 bottom-0 border border-white/15 bg-black/20 sm:inset-x-8 lg:inset-x-10" />
             <div className="absolute inset-x-0 top-18 bottom-10 bg-[linear-gradient(145deg,transparent_0%,rgba(255,106,0,.2)_48%,rgba(225,6,0,.72)_100%)]" />
-            <div className="absolute bottom-16 left-8 text-[10rem] font-black uppercase leading-none tracking-[-0.12em] text-white/10">B</div>
-            <div className="absolute right-2 top-10 rotate-90 text-xs font-bold uppercase tracking-[0.42em] text-gold">The experience, considered</div>
-            <div className="absolute bottom-0 left-0 border-l-2 border-gold pl-4 text-sm uppercase tracking-[0.24em] text-white/70">Good food<br />Good energy<br />Good people</div>
+            <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-center px-6 pt-8 sm:pt-10 lg:pt-12">
+              <img
+                src="/logo5.png"
+                alt="Bagma Lifestyle logo"
+                className="h-36 w-auto max-w-[95%] object-contain drop-shadow-[0_0_30px_rgba(217,119,6,0.35)] sm:h-44 lg:h-56 xl:h-64"
+              />
+            </div>
+            <div className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 text-[6.5rem] font-black uppercase leading-none tracking-[-0.12em] text-white/10 sm:text-[8rem] lg:bottom-16 lg:left-1/2 lg:text-[10rem] lg:-translate-x-1/2">B</div>
+            <div className="absolute right-2 top-10 rotate-90 text-[0.6rem] font-bold uppercase tracking-[0.42em] text-gold sm:text-[0.7rem]">The experience, considered</div>
+            <div className="absolute bottom-0 left-0 border-l-2 border-gold pl-4 text-xs uppercase tracking-[0.24em] text-white/70 sm:text-sm">Good food<br />Good energy<br />Good people</div>
           </div>
         </div>
         <div className="relative mx-auto flex max-w-7xl items-center justify-between border-t border-white/10 px-4 py-4 text-xs uppercase tracking-[0.22em] text-white/45 sm:px-6 lg:px-8"><span>Scroll to explore</span><ChevronDown className="h-4 w-4 text-gold" /></div>

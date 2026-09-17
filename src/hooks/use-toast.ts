@@ -23,7 +23,7 @@ export const useToastStore = create<ToastStore>((set) => ({
 }));
 
 export function useToast() {
-  const { addToast, removeToast } = useToastStore();
+  const { addToast } = useToastStore();
 
   return {
     toast: (toast: Omit<Toast, 'id'>) => addToast(toast),

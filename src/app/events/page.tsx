@@ -59,7 +59,7 @@ export default async function EventsPage() {
 }
 
 function EventGroup({ title, events, empty }: { title: string; events: BagmaEvent[]; empty: string }) {
-  return <section><div className="mb-6 flex items-center justify-between"><h2 className="text-3xl font-black uppercase text-white">{title}</h2><span className="text-sm text-white/45">{events.length}</span></div>{events.length ? <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">{events.map((event, index) => (
+  return <section><div className="mb-6 flex items-center justify-between"><h2 className="text-3xl font-black uppercase text-white">{title}</h2><span className="text-sm text-white/45">{events.length}</span></div>{events.length ? <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">{events.map((event) => (
               <Link key={event.id} href={`/events/${event.slug}`} className="group">
                 <Card className="overflow-hidden h-full group-hover:border-gold/50 transition-colors">
                   {event.image_url && (

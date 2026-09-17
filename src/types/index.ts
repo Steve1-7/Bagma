@@ -8,11 +8,20 @@ export interface User {
 export interface Profile {
   id: string;
   user_id: string;
+  first_name: string | null;
+  last_name: string | null;
   full_name: string | null;
+  email: string | null;
   phone: string | null;
+  address: string | null;
+  city: string | null;
+  postal_code: string | null;
+  country: string | null;
   role: 'customer' | 'staff' | 'manager' | 'super_admin';
+  is_active: boolean | null;
   created_at: string;
   updated_at: string;
+  last_activity: string | null;
 }
 
 export interface MenuCategory {
@@ -63,6 +72,10 @@ export interface Order {
   delivery_instructions: string | null;
   order_type: 'delivery' | 'collection';
   status: 'received' | 'confirmed' | 'preparing' | 'ready' | 'out_for_delivery' | 'delivered' | 'cancelled';
+  payment_method: string | null;
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded' | 'awaiting_verification';
+  payment_reference: string | null;
+  payment_provider: string | null;
   subtotal: number;
   delivery_fee: number;
   discount: number;

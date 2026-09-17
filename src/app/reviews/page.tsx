@@ -56,7 +56,7 @@ export default function ReviewsPage() {
       success('Review submitted! It will be published after approval.');
       setShowForm(false);
       setFormData({ name: '', rating: 5, review: '' });
-    } catch (err) {
+    } catch {
       error('Failed to submit review. Please try again.');
     } finally {
       setIsSubmitting(false);

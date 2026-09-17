@@ -2,7 +2,6 @@
 
 import { useToastStore } from '@/hooks/use-toast';
 import Toast from '@/components/ui/toast';
-import { useEffect } from 'react';
 
 export default function ToastProvider() {
   const { toasts, removeToast } = useToastStore();

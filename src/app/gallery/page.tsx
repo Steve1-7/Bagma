@@ -12,8 +12,6 @@ export default async function GalleryPage() {
     .eq('active', true)
     .order('sort_order');
 
-  const categories = ['food', 'carwash', 'venue', 'events', 'lifestyle'] as const;
-
   return (
     <div className="min-h-screen">
       {/* Header */}

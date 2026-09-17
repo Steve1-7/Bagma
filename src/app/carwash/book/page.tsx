@@ -7,7 +7,6 @@ import Button from '@/components/ui/button';
 import Card from '@/components/ui/card';
 import Input from '@/components/ui/input';
 import Textarea from '@/components/ui/textarea';
-import Badge from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
 import { notifyWhatsApp } from '@/lib/notify-whatsapp';
@@ -119,7 +118,7 @@ export default function CarwashBookPage() {
 
       success('Booking confirmed successfully!');
       router.push('/carwash/booking-confirmation');
-    } catch (err) {
+    } catch {
       error('Failed to create booking. Please try again.');
     } finally {
       setLoading(false);
