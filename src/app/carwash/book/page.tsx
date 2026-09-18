@@ -100,6 +100,7 @@ export default function CarwashBookPage() {
       const supabase = createClient();
       if (!selectedVehicle || !selectedService || !selectedDate || !selectedTime) throw new Error('Complete all booking details.');
       const { data: { user } } = await supabase.auth.getUser();
+      const bookingDescription = `${selectedVehicle.name} · ${selectedService.name}${selectedAddons.length ? ` + ${selectedAddons.map((addon) => addon.name).join(', ')}` : ''}`;
       const { error: bookingError } = await supabase.from('carwash_bookings').insert({
         user_id: user?.id || null,
         customer_name: formData.fullName.trim(),
@@ -112,6 +113,7 @@ export default function CarwashBookPage() {
         booking_time: selectedTime,
         notes: formData.notes.trim() || null,
         total_price: calculateTotal(),
+        booking_description: bookingDescription,
       });
       if (bookingError) throw bookingError;
       await notifyWhatsApp('carwash', { customer: formData.fullName.trim(), phone: formData.phone.trim(), date: selectedDate, time: selectedTime, service: selectedService.name, vehicle: selectedVehicle.name, total: calculateTotal().toFixed(2) });

@@ -175,6 +175,6 @@ AS $$
 $$;
 
 UPDATE profiles
-SET email = COALESCE(email, auth_users.email)
+SET email = COALESCE(profiles.email, auth_users.email)
 FROM auth.users AS auth_users
 WHERE profiles.id = auth_users.id;

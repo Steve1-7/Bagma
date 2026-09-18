@@ -4,7 +4,8 @@ import { ShoppingBag, Utensils } from 'lucide-react';
 import Card from '@/components/ui/card';
 import Badge from '@/components/ui/badge';
 
-export default async function OrderPage() {
+export default async function OrderPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+  const { category } = await searchParams;
   const supabase = await createClient();
   const { data: categories, error: categoriesError } = await supabase
     .from('menu_categories')
@@ -25,6 +26,7 @@ export default async function OrderPage() {
   }
 
   const categoryMap = new Map((categories || []).map((category) => [category.id, category]));
+  const visibleCategories = category ? (categories || []).filter((item) => item.id === category) : categories || [];
 
   return (
     <div className="min-h-screen">
@@ -38,6 +40,24 @@ export default async function OrderPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="mb-8 flex flex-wrap gap-2">
+          <Link href="/order" className={`border px-4 py-2 text-sm font-semibold transition-colors ${!category ? 'border-red bg-red text-white' : 'border-white/15 bg-charcoal/60 text-white/70 hover:border-red/40 hover:text-white'}`}>
+            All categories
+          </Link>
+          {(categories || []).map((item) => {
+            const isSelected = category === item.id;
+            return (
+              <Link
+                key={item.id}
+                href={isSelected ? '/order' : `/order?category=${item.id}`}
+                className={`border px-4 py-2 text-sm font-semibold transition-colors ${isSelected ? 'border-red bg-red text-white' : 'border-white/15 bg-charcoal/60 text-white/70 hover:border-red/40 hover:text-white'}`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
+
         {(categoriesError || itemsError) && (
           <div className="mb-10 border border-red/40 bg-red/10 p-6">
             <h2 className="text-xl font-bold text-white">The order menu is temporarily unavailable</h2>
@@ -45,7 +65,7 @@ export default async function OrderPage() {
           </div>
         )}
 
-        {categories && categories.length > 0 ? categories.map((category) => {
+        {visibleCategories && visibleCategories.length > 0 ? visibleCategories.map((category) => {
           const categoryItems = itemsByCategory.get(category.id) || [];
           if (categoryItems.length === 0) return null;
 

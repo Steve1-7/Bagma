@@ -23,7 +23,8 @@ export default function TicketPurchase({ eventId, eventTitle, ticketPrice, ticke
       return;
     }
     setSaving(true);
-    const { error: insertError } = await createClient().from('event_ticket_orders').insert({ event_id: eventId, customer_name: form.name.trim(), customer_email: form.email.trim(), customer_phone: form.phone.trim(), quantity, unit_price: ticketPrice, total: ticketPrice * quantity });
+    const ticketSummary = `${eventTitle} · ${quantity} ticket${quantity > 1 ? 's' : ''}`;
+    const { error: insertError } = await createClient().from('event_ticket_orders').insert({ event_id: eventId, customer_name: form.name.trim(), customer_email: form.email.trim(), customer_phone: form.phone.trim(), quantity, unit_price: ticketPrice, total: ticketPrice * quantity, order_description: ticketSummary });
     setSaving(false);
     if (insertError) {
       error(insertError.message);

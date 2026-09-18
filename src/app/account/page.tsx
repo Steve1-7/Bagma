@@ -21,7 +21,9 @@ type OrderRecord = {
   payment_method: string | null;
   total: number;
   delivery_address: string | null;
+  order_description: string | null;
   created_at: string;
+  kind?: 'food' | 'carwash';
 };
 
 type ProfileRecord = {
@@ -87,9 +89,10 @@ export default function AccountPage() {
       return;
     }
 
-    const [{ data: profileData }, { data: orderData }] = await Promise.all([
+    const [{ data: profileData }, { data: orderData }, { data: bookingData }] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', session.user.id).single(),
       supabase.from('orders').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false }),
+      supabase.from('carwash_bookings').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false }),
     ]);
 
     if (profileData) {
@@ -100,7 +103,26 @@ export default function AccountPage() {
       });
     }
 
-    setOrders((orderData || []) as OrderRecord[]);
+    const mergedOrders = [
+      ...(orderData || []).map((order) => ({ ...order, kind: 'food' as const })),
+      ...(bookingData || []).map((booking) => ({
+        id: booking.id,
+        customer_name: booking.customer_name,
+        customer_email: booking.customer_email,
+        customer_phone: booking.customer_phone,
+        order_type: 'collection' as const,
+        status: booking.status,
+        payment_status: 'pending',
+        payment_method: null,
+        total: Number(booking.total_price || 0),
+        delivery_address: null,
+        order_description: booking.booking_description || `${booking.customer_name} carwash booking`,
+        created_at: booking.created_at,
+        kind: 'carwash' as const,
+      })),
+    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    setOrders(mergedOrders as OrderRecord[]);
     setSessionReady(true);
     setLoading(false);
   }, [supabase]);
@@ -422,12 +444,12 @@ export default function AccountPage() {
                         <span className="rounded-full bg-gold/10 px-2 py-1 text-[10px] font-bold uppercase text-gold">{order.status}</span>
                       </div>
                       <div className="mt-3 flex items-center justify-between text-sm text-white/65">
-                        <span>{order.order_type === 'delivery' ? 'Delivery' : 'Collection'}</span>
-                        <span>{order.payment_status}</span>
+                        <span>{order.kind === 'carwash' ? 'Carwash booking' : (order.order_type === 'delivery' ? 'Delivery' : 'Collection')}</span>
+                        <span>{order.payment_status || order.status}</span>
                       </div>
-                      <div className="mt-2 text-sm text-white/75">{order.delivery_address || 'No delivery address'} </div>
+                      <div className="mt-2 text-sm text-white/75">{order.order_description || order.delivery_address || 'No order details available'}</div>
                       <div className="mt-3 flex items-center justify-between text-sm font-semibold text-white">
-                        <span>{order.payment_method || 'Payment method pending'}</span>
+                        <span>{order.kind === 'carwash' ? 'Booking request' : (order.payment_method || 'Payment method pending')}</span>
                         <span>{formatPrice(Number(order.total))}</span>
                       </div>
                     </div>

@@ -113,6 +113,12 @@ export default function CheckoutPage() {
       const subtotal = getSubtotal();
       const deliveryFee = orderType === 'collection' ? 0 : getDeliveryFee();
       const total = subtotal + deliveryFee;
+      const orderDescription = items.map((item) => {
+        const itemName = item.menuItem.name;
+        const extrasLabel = item.extras && item.extras.length > 0 ? ` (${item.extras.map((extra) => extra.name).join(', ')})` : '';
+        const notesLabel = item.notes ? ` — ${item.notes}` : '';
+        return `${itemName}${extrasLabel} x${item.quantity}${notesLabel}`;
+      }).join('; ');
       const { data: order, error: orderError } = await supabase.from('orders').insert({
         user_id: user?.id || null,
         customer_name: formData.fullName.trim(),
@@ -128,6 +134,7 @@ export default function CheckoutPage() {
         delivery_fee: deliveryFee,
         total,
         order_notes: formData.orderNotes.trim() || null,
+        order_description: orderDescription || 'Food order',
       }).select('id').single();
       if (orderError || !order) throw orderError || new Error('Order could not be created.');
 

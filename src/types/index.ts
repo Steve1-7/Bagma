@@ -81,6 +81,7 @@ export interface Order {
   discount: number;
   total: number;
   order_notes: string | null;
+  order_description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -145,6 +146,7 @@ export interface CarwashBooking {
   booking_time: string;
   status: 'pending' | 'confirmed' | 'arrived' | 'in_progress' | 'completed' | 'cancelled';
   notes: string | null;
+  booking_description: string | null;
   total_price: number;
   created_at: string;
   updated_at: string;

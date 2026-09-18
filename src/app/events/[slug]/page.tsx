@@ -55,12 +55,14 @@ export default async function EventPage({
           {/* Event Details */}
           <div className="lg:col-span-2">
             {event.image_url && (
-              <Card className="overflow-hidden mb-8">
-                <img
-                  src={event.image_url}
-                  alt={event.title}
-                  className="w-full aspect-video object-cover"
-                />
+              <Card className="mb-8 overflow-hidden p-0">
+                <div className="relative h-[320px] w-full sm:h-[420px]">
+                  <img
+                    src={event.image_url}
+                    alt={event.title}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
               </Card>
             )}
 
