@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, CheckCircle, Clock, MapPin, Package, Truck } from 'lucide-react';
@@ -30,6 +30,14 @@ const statusSteps = [
 ] as const;
 
 export default function TrackOrderPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen px-4 py-12 text-white/70">Loading order tracker...</div>}>
+      <TrackOrderPageInner />
+    </Suspense>
+  );
+}
+
+function TrackOrderPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderQuery = searchParams.get('order') ?? '';
