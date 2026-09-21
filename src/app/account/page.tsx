@@ -452,6 +452,13 @@ export default function AccountPage() {
                         <span>{order.kind === 'carwash' ? 'Booking request' : (order.payment_method || 'Payment method pending')}</span>
                         <span>{formatPrice(Number(order.total))}</span>
                       </div>
+                      {order.kind !== 'carwash' && (
+                        <div className="mt-3">
+                          <Link href={`/track-order?order=${encodeURIComponent(order.id)}`} className="inline-flex items-center text-sm font-bold uppercase tracking-[0.14em] text-gold hover:text-white">
+                            Track order
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}

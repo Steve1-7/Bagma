@@ -33,7 +33,7 @@ export default async function OrderConfirmationPage({ searchParams }: { searchPa
 
           <div className="space-y-3">
             <Button size="lg" className="w-full" asChild>
-              <Link href="/track-order">Track Your Order</Link>
+              <Link href={order ? `/track-order?order=${encodeURIComponent(order)}` : '/track-order'}>Track Your Order</Link>
             </Button>
             <Button variant="outline" size="lg" className="w-full" asChild>
               <Link href="/order">Order More</Link>

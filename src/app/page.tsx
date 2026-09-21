@@ -48,8 +48,7 @@ export default function Home() {
                 className="h-full w-full object-cover object-center opacity-90"
               />
             </div>
-            <div className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 text-[6.5rem] font-black uppercase leading-none tracking-[-0.12em] text-white/10 sm:text-[8rem] lg:bottom-16 lg:left-1/2 lg:text-[10rem] lg:-translate-x-1/2">B</div>
-            <div className="absolute right-2 top-10 rotate-90 text-[0.6rem] font-bold uppercase tracking-[0.42em] text-gold sm:text-[0.7rem]">The experience, considered</div>
+            <div className="absolute inset-0 z-10" aria-hidden="true" />
           </div>
         </div>
         <div className="relative mx-auto flex max-w-7xl items-center justify-between border-t border-white/10 px-4 py-4 text-xs uppercase tracking-[0.22em] text-white/45 sm:px-6 lg:px-8"><span>Scroll to explore</span><ChevronDown className="h-4 w-4 text-gold" /></div>
