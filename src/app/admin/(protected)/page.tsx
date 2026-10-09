@@ -7,6 +7,7 @@ import AdminOrders from '@/components/admin/admin-orders';
 import AdminBookings from '@/components/admin/admin-bookings';
 import AdminCarwash from '@/components/admin/admin-carwash';
 import AdminCustomers from '@/components/admin/admin-customers';
+import AdminRooftop from '@/components/admin/admin-rooftop';
 
 const dashboardLinks = [
   { label: 'Orders', detail: 'Review incoming food orders', icon: ClipboardList },
@@ -20,7 +21,7 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/admin/login');
 
-  const [{ data: profile }, { data: categories }, { data: items }, { data: events }, { data: podcasts }, { data: orders }, { data: ticketSales }, { data: bookings }, { data: services }, { data: addons }, { data: customers }] = await Promise.all([
+  const [{ data: profile }, { data: categories }, { data: items }, { data: events }, { data: podcasts }, { data: orders }, { data: ticketSales }, { data: bookings }, { data: services }, { data: addons }, { data: customers }, { data: rooftopRequests }] = await Promise.all([
     supabase.from('profiles').select('full_name').eq('id', user.id).single(),
     supabase.from('menu_categories').select('id, name, description, active, sort_order, parent_id').order('sort_order'),
     supabase.from('menu_items').select('id, category_id, name, description, price, promotional_price, available, featured, image_url, sort_order').order('sort_order'),
@@ -32,6 +33,7 @@ export default async function AdminPage() {
     supabase.from('carwash_services').select('id, name, description, base_price, duration_minutes, active, featured, image_url').order('sort_order'),
     supabase.from('carwash_addons').select('id, name, description, price, active, image_url').order('sort_order'),
     supabase.from('profiles').select('id, full_name, first_name, last_name, email, phone, address, city, postal_code, country, is_active, created_at, last_activity').order('created_at', { ascending: false }),
+    supabase.from('rooftop_experience_requests').select('*').order('created_at', { ascending: false }),
   ]);
 
   const customerOrderStats = orders ? orders.reduce<Record<string, { count: number; last_order_at: string | null }>>((acc, order) => {
@@ -67,6 +69,7 @@ export default async function AdminPage() {
         <AdminCustomers customers={customerList} />
         <AdminOrders orders={orders || []} ticketSales={ticketSales || []} />
         <AdminBookings initialBookings={bookings || []} />
+        <AdminRooftop initialRequests={rooftopRequests || []} />
         <AdminCarwash initialServices={services || []} initialAddons={addons || []} />
 
         <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
