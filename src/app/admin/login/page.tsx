@@ -7,5 +7,10 @@ export default async function AdminLoginPage({
 }) {
   const { error } = await searchParams;
 
-  return <AdminLoginForm unauthorized={error === 'unauthorized'} />;
+  return (
+    <AdminLoginForm
+      unauthorized={error === 'unauthorized'}
+      callbackFailed={error === 'auth_callback_failed'}
+    />
+  );
 }

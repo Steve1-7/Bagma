@@ -177,6 +177,7 @@ export default function AccountPage() {
           email: authForm.email,
           password: authForm.password,
           options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/account`,
             data: {
               first_name: authForm.firstName,
               last_name: authForm.lastName,

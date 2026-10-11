@@ -7,14 +7,22 @@ import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/client';
 
-export default function AdminLoginForm({ unauthorized }: { unauthorized: boolean }) {
+export default function AdminLoginForm({
+  unauthorized,
+  callbackFailed,
+}: {
+  unauthorized: boolean;
+  callbackFailed: boolean;
+}) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(
     unauthorized
       ? 'This account does not have dashboard access. Ask an administrator to assign it the manager or super admin role.'
-      : ''
+      : callbackFailed
+        ? 'The sign-in link is invalid or expired. Please request a new link and try again.'
+        : ''
   );
   const [loading, setLoading] = useState(false);
 
