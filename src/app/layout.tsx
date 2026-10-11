@@ -7,6 +7,7 @@ import MobileNav from '@/components/layout/mobile-nav';
 import ToastProvider from '@/components/ui/toast-provider';
 import PwaInstall from '@/components/pwa/pwa-install';
 import ServiceWorkerRegister from '@/components/pwa/service-worker-register';
+import InviteRedirect from '@/components/auth/invite-redirect';
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -66,6 +67,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ToastProvider />
         <PwaInstall />
         <ServiceWorkerRegister />
+        <InviteRedirect />
       </body>
     </html>
   );
