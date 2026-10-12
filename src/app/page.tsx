@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import {
   ArrowRight,
   CalendarDays,
@@ -29,7 +30,19 @@ const moments = [
   { index: '05', title: 'The next room to know', detail: 'Bagmaa Club brings the culture, sound and energy that keeps the night moving.', href: '/club' },
 ];
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string; next?: string }>;
+}) {
+  const { code, next } = await searchParams;
+
+  if (code) {
+    const nextPath = next?.startsWith('/admin/') || next === '/admin' ? next : '/admin';
+    const callbackParams = new URLSearchParams({ code, next: nextPath });
+    redirect(`/auth/callback?${callbackParams.toString()}`);
+  }
+
   return (
     <div className="min-h-screen bg-background text-white">
       <section className="relative isolate overflow-hidden border-b border-white/10 bg-[#17100d]">
