@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, Manrope } from "next/font/google";
 import "./globals.css";
-import Navbar from '@/components/layout/navbar';
-import Footer from '@/components/layout/footer';
-import MobileNav from '@/components/layout/mobile-nav';
+import SiteShell from '@/components/layout/site-shell';
 import ToastProvider from '@/components/ui/toast-provider';
 import PwaInstall from '@/components/pwa/pwa-install';
 import ServiceWorkerRegister from '@/components/pwa/service-worker-register';
@@ -60,10 +58,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${manrope.variable} ${bebasNeue.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Navbar />
-        <main className="flex-1 pt-20 pb-16 md:pb-0">{children}</main>
-        <Footer />
-        <MobileNav />
+        <SiteShell>{children}</SiteShell>
         <ToastProvider />
         <PwaInstall />
         <ServiceWorkerRegister />
