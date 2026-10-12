@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { BarChart3, CalendarDays, ClipboardList, Package, UtensilsCrossed } from 'lucide-react';
+import { CalendarDays, Car, ClipboardList, Package, PartyPopper, Users } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import AdminSignOut from '@/components/admin/admin-sign-out';
 import AdminManagement from '@/components/admin/admin-management';
@@ -10,10 +10,12 @@ import AdminCustomers from '@/components/admin/admin-customers';
 import AdminRooftop from '@/components/admin/admin-rooftop';
 
 const dashboardLinks = [
-  { label: 'Orders', detail: 'Review incoming food orders', icon: ClipboardList },
-  { label: 'Carwash bookings', detail: 'Manage upcoming appointments', icon: CalendarDays },
-  { label: 'Menu', detail: 'Update items and availability', icon: UtensilsCrossed },
-  { label: 'Reports', detail: 'Track activity across Bagma', icon: BarChart3 },
+  { label: 'Customers', detail: 'View customer profiles and activity', href: '#customers', icon: Users },
+  { label: 'Orders', detail: 'Review food orders and ticket sales', href: '#orders', icon: ClipboardList },
+  { label: 'Bookings', detail: 'Manage carwash appointments', href: '#bookings', icon: CalendarDays },
+  { label: 'Rooftop', detail: 'Review experience requests', href: '#rooftop', icon: PartyPopper },
+  { label: 'Carwash', detail: 'Manage services and add-ons', href: '#carwash', icon: Car },
+  { label: 'Catalogue', detail: 'Update products, events and podcasts', href: '#catalogue', icon: Package },
 ];
 
 export default async function AdminPage() {
@@ -66,23 +68,41 @@ export default async function AdminPage() {
           <AdminSignOut />
         </header>
 
-        <AdminCustomers customers={customerList} />
-        <AdminOrders orders={orders || []} ticketSales={ticketSales || []} />
-        <AdminBookings initialBookings={bookings || []} />
-        <AdminRooftop initialRequests={rooftopRequests || []} />
-        <AdminCarwash initialServices={services || []} initialAddons={addons || []} />
-
-        <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {dashboardLinks.map(({ label, detail, icon: Icon }) => (
-            <article key={label} className="border border-white/10 bg-charcoal/60 p-6">
-              <Icon className="h-6 w-6 text-gold" />
-              <h2 className="mt-14 text-3xl font-black uppercase">{label}</h2>
-              <p className="mt-2 text-sm text-white/50">{detail}</p>
-            </article>
+        <nav aria-label="Admin dashboard sections" className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {dashboardLinks.map(({ label, detail, href, icon: Icon }) => (
+            <a
+              key={label}
+              href={href}
+              className="group border border-white/10 bg-charcoal/60 p-5 transition-colors hover:border-gold/60 hover:bg-charcoal"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-black uppercase group-hover:text-gold">{label}</h2>
+                  <p className="mt-1 text-sm text-white/50">{detail}</p>
+                </div>
+                <Icon className="h-6 w-6 shrink-0 text-gold" />
+              </div>
+            </a>
           ))}
-        </section>
+        </nav>
 
-        <section className="mt-14 border-t border-white/10 pt-10">
+        <div id="customers" className="scroll-mt-8">
+          <AdminCustomers customers={customerList} />
+        </div>
+        <div id="orders" className="scroll-mt-8">
+          <AdminOrders orders={orders || []} ticketSales={ticketSales || []} />
+        </div>
+        <div id="bookings" className="scroll-mt-8">
+          <AdminBookings initialBookings={bookings || []} />
+        </div>
+        <div id="rooftop" className="scroll-mt-8">
+          <AdminRooftop initialRequests={rooftopRequests || []} />
+        </div>
+        <div id="carwash" className="scroll-mt-8">
+          <AdminCarwash initialServices={services || []} initialAddons={addons || []} />
+        </div>
+
+        <section id="catalogue" className="mt-14 scroll-mt-8 border-t border-white/10 pt-10">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-gold"><Package className="h-4 w-4" /> Catalogue</p>
