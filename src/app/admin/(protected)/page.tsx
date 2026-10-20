@@ -29,7 +29,7 @@ export default async function AdminPage() {
     supabase.from('menu_items').select('id, category_id, name, description, price, promotional_price, available, featured, image_url, sort_order').order('sort_order'),
     supabase.from('events').select('*').order('event_date'),
     supabase.from('podcasts').select('*').order('published_at', { ascending: false }),
-    supabase.from('orders').select('id, user_id, customer_name, customer_email, customer_phone, order_type, status, total, delivery_address, order_description, created_at').order('created_at', { ascending: false }),
+    supabase.from('orders').select('id, user_id, customer_name, customer_email, customer_phone, order_type, status, total, delivery_address, delivery_instructions, order_notes, order_description, created_at, order_items(quantity, unit_price, extras, notes, menu_item:menu_items(name))').order('created_at', { ascending: false }),
     supabase.from('event_ticket_orders').select('id, event_id, customer_name, customer_email, quantity, status, order_description, created_at, event:events(title)').order('created_at', { ascending: false }),
     supabase.from('carwash_bookings').select('id, customer_name, customer_phone, customer_email, booking_date, booking_time, status, total_price, booking_description, notes, vehicle:carwash_vehicle_types(name), service:carwash_services(name)').order('booking_date', { ascending: false }).order('booking_time', { ascending: false }),
     supabase.from('carwash_services').select('id, name, description, base_price, duration_minutes, active, featured, image_url').order('sort_order'),
