@@ -190,19 +190,22 @@ export default function AdminOrders({ orders, ticketSales }: { orders: Order[]; 
                 <div>
                   <h3 className="font-bold">#{order.id.slice(0, 8)} · {order.customer_name}</h3>
                   <p className="mt-1 text-sm text-white/50">{order.order_type} · R{Number(order.total).toFixed(2)}</p>
-                  {order.order_items?.length ? (
+                  {order.order_description ? (
+                    <p className="mt-3 text-sm text-white/75">
+                      <span className="font-semibold text-white">Order: </span>
+                      {order.order_description}
+                    </p>
+                  ) : order.order_items?.length ? (
                     <ul className="mt-3 space-y-2 text-sm text-white/75">
                       {order.order_items.map((item, index) => (
                         <li key={`${order.id}-${index}`}>
-                          <span className="font-semibold">{item.menu_item?.[0]?.name || 'Menu item'}</span>
+                          <span className="font-semibold">{item.menu_item?.[0]?.name || 'Item details unavailable'}</span>
                           <span className="text-white/50"> × {item.quantity} · R{(Number(item.unit_price) * item.quantity).toFixed(2)}</span>
                           {item.extras?.length ? <p className="ml-2 text-xs text-white/45">Extras: {item.extras.map((extra) => extra.name).join(', ')}</p> : null}
                           {item.notes && <p className="ml-2 text-xs text-white/45">Item note: {item.notes}</p>}
                         </li>
                       ))}
                     </ul>
-                  ) : order.order_description ? (
-                    <p className="mt-2 text-sm text-white/60">{order.order_description}</p>
                   ) : null}
                   {order.order_notes && <p className="mt-2 text-sm text-white/60">Order note: {order.order_notes}</p>}
                   {order.delivery_address && <p className="mt-2 text-sm text-white/45">Deliver to: {order.delivery_address}</p>}
