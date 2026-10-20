@@ -119,7 +119,9 @@ export default function CheckoutPage() {
         const notesLabel = item.notes ? ` — ${item.notes}` : '';
         return `${itemName}${extrasLabel} x${item.quantity}${notesLabel}`;
       }).join('; ');
-      const { data: order, error: orderError } = await supabase.from('orders').insert({
+      const orderId = crypto.randomUUID();
+      const { error: orderError } = await supabase.from('orders').insert({
+        id: orderId,
         user_id: user?.id || null,
         customer_name: formData.fullName.trim(),
         customer_phone: formData.phone.trim(),
@@ -135,11 +137,11 @@ export default function CheckoutPage() {
         total,
         order_notes: formData.orderNotes.trim() || null,
         order_description: orderDescription || 'Food order',
-      }).select('id').single();
-      if (orderError || !order) throw orderError || new Error('Order could not be created.');
+      });
+      if (orderError) throw orderError;
 
       const { error: itemsError } = await supabase.from('order_items').insert(items.map((item) => ({
-        order_id: order.id,
+        order_id: orderId,
         menu_item_id: item.menuItem.id,
         quantity: item.quantity,
         unit_price: (item.menuItem.promotional_price || item.menuItem.price) + (item.extras?.reduce((sum, extra) => sum + extra.price, 0) || 0),
@@ -147,7 +149,7 @@ export default function CheckoutPage() {
         notes: item.notes || null,
       })));
       if (itemsError) throw itemsError;
-      await notifyWhatsApp('order', { id: order.id, customer: formData.fullName.trim(), phone: formData.phone.trim(), total: total.toFixed(2), type: orderType });
+      await notifyWhatsApp('order', { id: orderId, customer: formData.fullName.trim(), phone: formData.phone.trim(), total: total.toFixed(2), type: orderType });
 
       // Update cart with delivery info
       if (orderType === 'delivery') {
@@ -157,7 +159,7 @@ export default function CheckoutPage() {
 
       success('Order placed successfully!');
       clearCart();
-      router.push(`/order-confirmation?order=${order.id}`);
+      router.push(`/order-confirmation?order=${orderId}`);
     } catch (submitError) {
       error(submitError instanceof Error ? submitError.message : 'Failed to place order. Please try again.');
     } finally {
