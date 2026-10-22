@@ -23,36 +23,42 @@ import { useToast } from '@/hooks/use-toast';
 const occasions = [
   {
     title: 'Business Meetings',
+    occasionType: 'Business Meeting',
     description: 'Professional meetings in an elevated environment.',
     image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80',
     icon: Briefcase,
   },
   {
     title: 'Baby Showers',
+    occasionType: 'Baby Shower',
     description: 'Celebrate the arrival of something beautiful.',
     image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
     icon: Gift,
   },
   {
     title: 'Birthday Parties',
+    occasionType: 'Birthday Party',
     description: 'Turn another year into an experience.',
     image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
     icon: CakeSlice,
   },
   {
     title: 'Engagement Parties',
+    occasionType: 'Engagement Party',
     description: 'Celebrate the beginning of something unforgettable.',
     image: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80',
     icon: Heart,
   },
   {
     title: 'Anniversaries',
+    occasionType: 'Anniversary',
     description: 'Mark the moments that deserve to be remembered.',
     image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1200&q=80',
     icon: Sparkles,
   },
   {
     title: 'Private Celebrations',
+    occasionType: 'Private Celebration',
     description: 'For everything else worth bringing people together for.',
     image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200&q=80',
     icon: Users,
@@ -118,54 +124,21 @@ export default function RooftopPage() {
     fetchPosts();
   }, []);
 
-  const handleOccasionClick = (occasionTitle: string) => {
-    const postsForOccasion = getPostsForOccasion(occasionTitle);
-    const primaryPost = postsForOccasion[0] ?? null;
-
-    if (primaryPost) {
-      setSelectedPost(primaryPost);
-      setSelectedOccasion(null);
-      return;
-    }
-
-    setSelectedOccasion(occasionTitle);
+  const handleOccasionClick = (occasionType: string) => {
+    setSelectedOccasion(occasionType);
     setSelectedPost(null);
-    setFormData((prev) => ({ ...prev, eventType: occasionTitle }));
+    setFormData((prev) => ({ ...prev, eventType: occasionType }));
   };
 
-  const getPostsForOccasion = (occasionTitle: string) => {
-    return rooftopPosts.filter((p) => p.occasion_type === occasionTitle);
+  const getPostsForOccasion = (occasionType: string) => {
+    return rooftopPosts.filter((post) => post.occasion_type === occasionType);
   };
 
   const selectedOccasionDetails = selectedOccasion
-    ? occasions.find((occasion) => occasion.title === selectedOccasion) ?? null
+    ? occasions.find((occasion) => occasion.occasionType === selectedOccasion) ?? null
     : null;
 
   const selectedOccasionPosts = selectedOccasion ? getPostsForOccasion(selectedOccasion) : [];
-  const selectedOccasionHighlights =
-    selectedOccasionPosts.length > 0
-      ? selectedOccasionPosts.slice(0, 3).map((post) => ({
-          title: post.title,
-          description: post.description,
-          image: post.image_url ?? selectedOccasionDetails?.image ?? null,
-        }))
-      : [
-          {
-            title: `${selectedOccasion} styling`,
-            description: 'Tailored ambience, premium hospitality and a guest experience designed around the tone of your moment.',
-            image: selectedOccasionDetails?.image ?? null,
-          },
-          {
-            title: 'Guest experience flow',
-            description: 'Seamless hosting, curated food and beverage touches, and a clear plan for every stage of the occasion.',
-            image: selectedOccasionDetails?.image ?? null,
-          },
-          {
-            title: 'Signature details',
-            description: 'Bespoke décor, lighting, sound and service layered together to make the event feel unmistakably yours.',
-            image: selectedOccasionDetails?.image ?? null,
-          },
-        ];
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -257,12 +230,12 @@ export default function RooftopPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {occasions.map(({ title, description, image, icon: Icon }) => {
-              const posts = getPostsForOccasion(title);
+            {occasions.map(({ title, occasionType, description, image, icon: Icon }) => {
+              const posts = getPostsForOccasion(occasionType);
               return (
                 <article
                   key={title}
-                  onClick={() => handleOccasionClick(title)}
+                  onClick={() => handleOccasionClick(occasionType)}
                   className="group cursor-pointer overflow-hidden border border-white/10 bg-black/20 transition-all duration-300 hover:border-gold/40 hover:-translate-y-1"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
@@ -284,7 +257,7 @@ export default function RooftopPage() {
                     <h3 className="text-2xl font-black uppercase leading-tight text-white">{title}</h3>
                     <p className="mt-3 text-sm leading-relaxed text-white/60">{description}</p>
                     <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gold">
-                      {posts.length > 0 ? 'View details' : 'Tailored hosting'} <ArrowRight className="h-4 w-4" />
+                      {posts.length > 0 ? 'View our work' : 'View hosting'} <ArrowRight className="h-4 w-4" />
                     </div>
                   </div>
                 </article>
@@ -366,8 +339,8 @@ export default function RooftopPage() {
           <div className="mx-auto max-w-7xl">
             <div className="mb-8 flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold">{selectedOccasion}</p>
-                <h3 className="mt-2 text-3xl font-black uppercase">Tailored hosting for {selectedOccasion.toLowerCase()}</h3>
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold">{selectedOccasionDetails?.title}</p>
+                <h3 className="mt-2 text-3xl font-black uppercase">Tailored hosting for {selectedOccasionDetails?.title.toLowerCase()}</h3>
               </div>
               <button
                 type="button"
@@ -378,20 +351,33 @@ export default function RooftopPage() {
               </button>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-3">
-              {selectedOccasionHighlights.map((item) => (
-                <div key={item.title} className="overflow-hidden border border-white/10 bg-charcoal/60">
-                  {item.image && (
-                    <img src={item.image} alt={item.title} className="h-40 w-full object-cover" />
-                  )}
-                  <div className="p-5">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Curated experience</p>
-                    <h4 className="mt-3 text-xl font-black uppercase text-white">{item.title}</h4>
-                    <p className="mt-3 text-sm leading-relaxed text-white/65">{item.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {selectedOccasionPosts.length > 0 ? (
+              <div className="grid gap-5 lg:grid-cols-3">
+                {selectedOccasionPosts.map((post) => (
+                  <article key={post.id} className="overflow-hidden border border-white/10 bg-charcoal/60">
+                    {post.image_url && (
+                      <img src={post.image_url} alt={post.title} className="h-48 w-full object-cover" />
+                    )}
+                    <div className="p-5">
+                      <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Featured work</p>
+                      <h4 className="mt-3 text-xl font-black uppercase text-white">{post.title}</h4>
+                      <p className="mt-3 text-sm leading-relaxed text-white/65">{post.description}</p>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPost(post)}
+                        className="mt-5 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gold hover:text-white"
+                      >
+                        View details <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="border border-dashed border-white/15 bg-charcoal/40 p-8 text-center text-white/65">
+                We are preparing our {selectedOccasionDetails?.title.toLowerCase()} showcase. Contact us to plan a tailored experience.
+              </p>
+            )}
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Button
@@ -401,7 +387,7 @@ export default function RooftopPage() {
                   document.getElementById('enquire')?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
-                Enquire about {selectedOccasion} <ArrowRight className="ml-2 h-5 w-5" />
+                Enquire about {selectedOccasionDetails?.title} <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>
