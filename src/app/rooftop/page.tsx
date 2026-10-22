@@ -119,19 +119,53 @@ export default function RooftopPage() {
   }, []);
 
   const handleOccasionClick = (occasionTitle: string) => {
-    const post = rooftopPosts.find((p) => p.occasion_type === occasionTitle);
-    if (post) {
-      setSelectedPost(post);
-    } else {
-      setSelectedOccasion(occasionTitle);
-      setFormData((prev) => ({ ...prev, eventType: occasionTitle }));
-      document.getElementById('enquire')?.scrollIntoView({ behavior: 'smooth' });
+    const postsForOccasion = getPostsForOccasion(occasionTitle);
+    const primaryPost = postsForOccasion[0] ?? null;
+
+    if (primaryPost) {
+      setSelectedPost(primaryPost);
+      setSelectedOccasion(null);
+      return;
     }
+
+    setSelectedOccasion(occasionTitle);
+    setSelectedPost(null);
+    setFormData((prev) => ({ ...prev, eventType: occasionTitle }));
   };
 
   const getPostsForOccasion = (occasionTitle: string) => {
     return rooftopPosts.filter((p) => p.occasion_type === occasionTitle);
   };
+
+  const selectedOccasionDetails = selectedOccasion
+    ? occasions.find((occasion) => occasion.title === selectedOccasion) ?? null
+    : null;
+
+  const selectedOccasionPosts = selectedOccasion ? getPostsForOccasion(selectedOccasion) : [];
+  const selectedOccasionHighlights =
+    selectedOccasionPosts.length > 0
+      ? selectedOccasionPosts.slice(0, 3).map((post) => ({
+          title: post.title,
+          description: post.description,
+          image: post.image_url ?? selectedOccasionDetails?.image ?? null,
+        }))
+      : [
+          {
+            title: `${selectedOccasion} styling`,
+            description: 'Tailored ambience, premium hospitality and a guest experience designed around the tone of your moment.',
+            image: selectedOccasionDetails?.image ?? null,
+          },
+          {
+            title: 'Guest experience flow',
+            description: 'Seamless hosting, curated food and beverage touches, and a clear plan for every stage of the occasion.',
+            image: selectedOccasionDetails?.image ?? null,
+          },
+          {
+            title: 'Signature details',
+            description: 'Bespoke décor, lighting, sound and service layered together to make the event feel unmistakably yours.',
+            image: selectedOccasionDetails?.image ?? null,
+          },
+        ];
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -322,6 +356,53 @@ export default function RooftopPage() {
                   Close
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedOccasion && (
+        <div className="border-b border-white/10 bg-[#120d0d] px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-8 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold">{selectedOccasion}</p>
+                <h3 className="mt-2 text-3xl font-black uppercase">Tailored hosting for {selectedOccasion.toLowerCase()}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedOccasion(null)}
+                className="rounded-full border border-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white/70 transition hover:border-gold/60 hover:text-gold"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-3">
+              {selectedOccasionHighlights.map((item) => (
+                <div key={item.title} className="overflow-hidden border border-white/10 bg-charcoal/60">
+                  {item.image && (
+                    <img src={item.image} alt={item.title} className="h-40 w-full object-cover" />
+                  )}
+                  <div className="p-5">
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Curated experience</p>
+                    <h4 className="mt-3 text-xl font-black uppercase text-white">{item.title}</h4>
+                    <p className="mt-3 text-sm leading-relaxed text-white/65">{item.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button
+                size="lg"
+                onClick={() => {
+                  setFormData((prev) => ({ ...prev, eventType: selectedOccasion }));
+                  document.getElementById('enquire')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                Enquire about {selectedOccasion} <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
             </div>
           </div>
         </div>
