@@ -23,7 +23,7 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/admin/login');
 
-  const [{ data: profile }, { data: categories }, { data: items }, { data: events }, { data: podcasts }, { data: orders }, { data: ticketSales }, { data: bookings }, { data: services }, { data: addons }, { data: customers }, { data: rooftopRequests }] = await Promise.all([
+  const [{ data: profile }, { data: categories }, { data: items }, { data: events }, { data: podcasts }, { data: orders }, { data: ticketSales }, { data: bookings }, { data: services }, { data: addons }, { data: customers }, { data: rooftopRequests }, { data: rooftopPosts }] = await Promise.all([
     supabase.from('profiles').select('full_name').eq('id', user.id).single(),
     supabase.from('menu_categories').select('id, name, description, active, sort_order, parent_id').order('sort_order'),
     supabase.from('menu_items').select('id, category_id, name, description, price, promotional_price, available, featured, image_url, sort_order').order('sort_order'),
@@ -36,6 +36,7 @@ export default async function AdminPage() {
     supabase.from('carwash_addons').select('id, name, description, price, active, image_url').order('sort_order'),
     supabase.from('profiles').select('id, full_name, first_name, last_name, email, phone, address, city, postal_code, country, is_active, created_at, last_activity').order('created_at', { ascending: false }),
     supabase.from('rooftop_experience_requests').select('*').order('created_at', { ascending: false }),
+    supabase.from('rooftop_posts').select('*').order('created_at', { ascending: false }),
   ]);
 
   const customerOrderStats = orders ? orders.reduce<Record<string, { count: number; last_order_at: string | null }>>((acc, order) => {
@@ -96,7 +97,7 @@ export default async function AdminPage() {
           <AdminBookings initialBookings={bookings || []} />
         </div>
         <div id="rooftop" className="scroll-mt-8">
-          <AdminRooftop initialRequests={rooftopRequests || []} />
+          <AdminRooftop initialRequests={rooftopRequests || []} initialPosts={rooftopPosts || []} />
         </div>
         <div id="carwash" className="scroll-mt-8">
           <AdminCarwash initialServices={services || []} initialAddons={addons || []} />

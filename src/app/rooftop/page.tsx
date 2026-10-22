@@ -11,8 +11,9 @@ import {
   PartyPopper,
   Sparkles,
   Users,
+  X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import Textarea from '@/components/ui/textarea';
@@ -58,6 +59,21 @@ const occasions = [
   },
 ];
 
+type RooftopPost = {
+  id: string;
+  occasion_type: string;
+  title: string;
+  slug: string;
+  description: string;
+  image_url: string | null;
+  poster_url: string | null;
+  ticket_price: number | null;
+  ticket_capacity: number | null;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 const defaultForm = {
   eventType: '',
   preferredDate: '',
@@ -81,6 +97,41 @@ export default function RooftopPage() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState(defaultForm);
+  const [rooftopPosts, setRooftopPosts] = useState<RooftopPost[]>([]);
+  const [selectedPost, setSelectedPost] = useState<RooftopPost | null>(null);
+  const [selectedOccasion, setSelectedOccasion] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchPosts() {
+      const supabase = createClient();
+      const { data, error: fetchError } = await supabase
+        .from('rooftop_posts')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+      if (fetchError) {
+        console.error('Error fetching rooftop posts:', fetchError);
+      } else {
+        setRooftopPosts(data || []);
+      }
+    }
+    fetchPosts();
+  }, []);
+
+  const handleOccasionClick = (occasionTitle: string) => {
+    const post = rooftopPosts.find((p) => p.occasion_type === occasionTitle);
+    if (post) {
+      setSelectedPost(post);
+    } else {
+      setSelectedOccasion(occasionTitle);
+      setFormData((prev) => ({ ...prev, eventType: occasionTitle }));
+      document.getElementById('enquire')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const getPostsForOccasion = (occasionTitle: string) => {
+    return rooftopPosts.filter((p) => p.occasion_type === occasionTitle);
+  };
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -172,30 +223,109 @@ export default function RooftopPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {occasions.map(({ title, description, image, icon: Icon }) => (
-              <article key={title} className="group overflow-hidden border border-white/10 bg-black/20 transition-all duration-300 hover:border-gold/40 hover:-translate-y-1">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <img src={image} alt={title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-                  <div className="absolute bottom-4 left-4 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/60 bg-black/40 text-gold">
-                      <Icon className="h-5 w-5" />
+            {occasions.map(({ title, description, image, icon: Icon }) => {
+              const posts = getPostsForOccasion(title);
+              return (
+                <article
+                  key={title}
+                  onClick={() => handleOccasionClick(title)}
+                  className="group cursor-pointer overflow-hidden border border-white/10 bg-black/20 transition-all duration-300 hover:border-gold/40 hover:-translate-y-1"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img src={image} alt={title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                    <div className="absolute bottom-4 left-4 flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/60 bg-black/40 text-gold">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <span className="text-xs font-bold uppercase tracking-[0.22em] text-white">{title}</span>
                     </div>
-                    <span className="text-xs font-bold uppercase tracking-[0.22em] text-white">{title}</span>
+                    {posts.length > 0 && (
+                      <div className="absolute top-4 right-4 rounded-full bg-gold px-3 py-1 text-xs font-bold text-black">
+                        {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-black uppercase leading-tight text-white">{title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-white/60">{description}</p>
-                  <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gold">
-                    Tailored hosting <ArrowRight className="h-4 w-4" />
+                  <div className="p-6">
+                    <h3 className="text-2xl font-black uppercase leading-tight text-white">{title}</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-white/60">{description}</p>
+                    <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gold">
+                      {posts.length > 0 ? 'View details' : 'Tailored hosting'} <ArrowRight className="h-4 w-4" />
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
+
+      {selectedPost && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/90 p-4 sm:p-10">
+          <div className="mx-auto max-w-4xl border border-white/15 bg-charcoal p-5 sm:p-8">
+            <header className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-gold">{selectedPost.occasion_type}</p>
+                <h2 className="mt-2 text-3xl font-black uppercase">{selectedPost.title}</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPost(null)}
+                aria-label="Close details"
+                className="text-white/60 hover:text-white"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </header>
+            <div className="mt-6">
+              {selectedPost.image_url && (
+                <img src={selectedPost.image_url} alt={selectedPost.title} className="h-64 w-full object-cover" />
+              )}
+              <div className="mt-6 space-y-4">
+                <p className="text-lg leading-relaxed text-white/80">{selectedPost.description}</p>
+                {(selectedPost.ticket_price || selectedPost.ticket_capacity) && (
+                  <div className="flex flex-wrap gap-4 pt-4 border-t border-white/10">
+                    {selectedPost.ticket_price && (
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wider text-gold">Ticket price</p>
+                        <p className="mt-1 text-2xl font-black">R{selectedPost.ticket_price}</p>
+                      </div>
+                    )}
+                    {selectedPost.ticket_capacity && (
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wider text-gold">Capacity</p>
+                        <p className="mt-1 text-2xl font-black">{selectedPost.ticket_capacity} guests</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {selectedPost.poster_url && (
+                  <div className="pt-4 border-t border-white/10">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gold">Event poster</p>
+                    <img src={selectedPost.poster_url} alt="Event poster" className="mt-2 h-auto w-full max-w-md" />
+                  </div>
+                )}
+              </div>
+              <div className="mt-8 flex gap-3">
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    setFormData((prev) => ({ ...prev, eventType: selectedPost.occasion_type }));
+                    setSelectedPost(null);
+                    document.getElementById('enquire')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="flex-1"
+                >
+                  Book this experience <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <Button size="lg" variant="outline" onClick={() => setSelectedPost(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section id="enquire" className="px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
         <div className="mx-auto max-w-7xl">
